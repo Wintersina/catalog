@@ -1,5 +1,5 @@
-import sys
-from sqlalchemy import Column, ForeignKey, Integer, String
+import datetime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -44,8 +44,15 @@ class Users(Base):
     name = Column(String(80), nullable=False)
     email = Column(String(80), nullable=False)
 
+class Recent(Base):
+    __tablename__ = "recently"
 
-engine = create_engine('sqlite:///restaurantmenu.db')
+    id = Column(Integer, primary_key=True)
+    item = Column(String(80), nullable=False)
+    category = Column(String(80), nullable=False)
+    created_date = Column(DateTime, default=datetime.datetime.utcnow)
+
+engine = create_engine('sqlite:///catalogdb.db')
 
 Base.metadata.create_all(engine)
 
