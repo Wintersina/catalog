@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, redirect, request, flash, jsonify
-import os, random, string, json, requests
+import os, random, string, json, requests, httplib2
 from sqlalchemy import create_engine, distinct
 from sqlalchemy.orm import sessionmaker
 from database_setup import Users,Categories,Items,Base
@@ -42,7 +42,7 @@ def gconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     # Obtain authorization code
-    code = request.data
+    code = request.data.decode('utf-8')
 
     try:
         # Upgrade the authorization code into a credentials object
@@ -109,55 +109,132 @@ def gconnect():
     login_session['email'] = data['email']
 
     output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+
     flash("you are now logged in as %s" % login_session['username'])
-    print ("done!")
     return output
 
+#disconnect user from google signin
+@app.route('/gdisconnect')
+def gdisconnect():
+    access_token = login_session.get('access_token')
+    if access_token is None:
+        print ('Access Token is None')
+        response = make_response(json.dumps('Current user not connected.'), 401)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    print ('In gdisconnect access token is %s', access_token)
+    print ('User name is: ')
+    print (login_session['username'])
+    print (login_session['access_token'])
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
+    h = httplib2.Http()
+    result = h.request(url, 'GET')[0]
 
-@app.route('/')
-def root():
-    return "you are root"
+    print ('result is ')
+    print (result)
+    if result['status'] == '200':
+        del login_session['access_token']
+        del login_session['gplus_id']
+        del login_session['username']
+        del login_session['email']
+        del login_session['picture']
+        response = make_response(json.dumps('Successfully disconnected.'), 200)
+        response.headers['Content-Type'] = 'application/json'
+        return response
+    else:
+        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response.headers['Content-Type'] = 'application/json'
+        return response
 
 #list all catalogs
+@app.route('/')
 @app.route('/catalog/')
 def showAllCategories():
-    return "you are at all categories"
+    results = session.query(Categories).all()
+    return render_template('catagory.html',a_c=results)
 
 #list all items for certin catalog
 @app.route('/catalog/<string:catalog_name>/items')
 def catalogItems(catalog_name):
-    return "you reached %s" % catalog_name
+    all_catagories = session.query(Categories).all()
+    get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
+    get_all_items_for_category = session.query(Items).filter_by(category_id=get_category_id.id)
+    return render_template('listitems.html',a_c=all_catagories,a_i=get_all_items_for_category,c_n=get_category_id.name)
 
 #list discription about certin item in certin catalog
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/')
 def aboutItem(catalog_name,item_name):
-    return "you reached %s with about me for %s" % (catalog_name,item_name)
+    get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
+    item  = session.query(Items).filter_by(title=item_name,category_id= get_category_id.id).one()
+    return render_template('aboutitem.html', item = item, category=get_category_id)
 
 ###CRUD--ITEM###
 
 #edit catalog item
-@app.route('/catalog/<string:catalog_name>/<string:item_name>/edit')
+@app.route('/catalog/<string:catalog_name>/<string:item_name>/edit', methods=['GET','POST'])
 def editItem(catalog_name,item_name):
-    return "you reached edit"
+    if 'username' not in login_session:
+        return redirect('/login')
+    else:
+        get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
+        editItem = session.query(Items).filter_by(title=item_name,category_id= get_category_id.id).one()
+        if request.method == 'POST':
+            if request.form['title']:
+                editItem.title = request.form['title']
+            if request.form['description']:
+                editItem.description = request.form['description']
+            session.add(editItem)
+            session.commit()
+            output = redirect(url_for('showAllCategories'))
+            return output
+        else:
+            output = render_template('itemedit.html',category = get_category_id, item= editItem)
+            return output
 
 #delete catalog item
-@app.route('/catalog/<string:catalog_name>/<string:item_name>/delete')
+@app.route('/catalog/<string:catalog_name>/<string:item_name>/delete', methods=['GET','POST'])
 def deleteItem(catalog_name,item_name):
-    return "you reached delete"
+    if 'username' not in login_session:
+        return redirect('/login')
+    else:
+        pass
 
 #create a new catalog item
-@app.route('/catalog/<string:catalog_name>/item/new')
+@app.route('/catalog/<string:catalog_name>/item/new', methods=['GET','POST'])
 def newItem(catalog_name):
+    if 'username' not in login_session:
+        return redirect('/login')
     return "you reached new item creation"
+
+#---USER INFO HELPERS---#
+
+# User Helper Functions
+
+
+def createUser(login_session):
+    new_user = Users(name=login_session['username'], email=login_session[
+        'email'])
+    session.add(new_user)
+    session.commit()
+    user = session.query(Users).filter_by(email=login_session['email']).one()
+    return user.id
+
+
+def getUserInfo(user_id):
+    user = session.query(Users).filter_by(id=user_id).one()
+    return user
+
+
+def getUserID(email):
+    try:
+        user = session.query(Users).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 if __name__ == '__main__':
     app.secret_key = "yum_yum_key"
     app.debug = True
-    port = int(os.environ.get('PORT',8000))
+    port = int(os.environ.get('PORT',8080))
     app.run(host = '0.0.0.0', port = port)
+

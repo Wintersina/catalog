@@ -6,6 +6,13 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+class Users(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(80), nullable=False)
+    email = Column(String(80), nullable=False)
+
 class Categories(Base):
     __tablename__ = 'categories'
 
@@ -27,6 +34,8 @@ class Items(Base):
     title = Column(String(80), nullable=False)
     category = relationship(Categories)
     category_id = Column(Integer, ForeignKey('categories.id'))
+    user = relationship(Users)
+    user_id = Column(Integer,ForeignKey('users.id'))
 
     @property
     def serialize(self):
@@ -37,12 +46,7 @@ class Items(Base):
             'category_id':self.category_id
         }
 
-class Users(Base):
-    __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String(80), nullable=False)
-    email = Column(String(80), nullable=False)
 
 class Recent(Base):
     __tablename__ = "recently"

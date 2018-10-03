@@ -1,0 +1,23 @@
+<html>
+    {% include "head.html" %}
+<body>
+<div class="hero">
+    <div class="container" style="background-color:lightblue">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>Categories</h2>
+                    {%for i in a_c %}
+                    <a href="{{ url_for('catalogItems', catalog_name = i.name) }}" class="text-info">{{i.name}}</a>
+                    <br>
+                    {%endfor%}
+                </div>
+                <div class="col-sm-6" >
+                    <h2>Latest Items</h2>
+                </div>
+            </div>
+    </div>
+</div>
+</body>
+</html>
+
+

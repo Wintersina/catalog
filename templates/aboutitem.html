@@ -1,0 +1,11 @@
+{% include "head.html" %}
+
+
+<div class="container" style="background-color:lightblue">
+        <h2>{{item.title}}</h2>
+        <br>
+        <p>{{item.description}}</p>
+    <br>
+    <a href="{{ url_for('editItem', catalog_name = category.name, item_name = item.title )}}">Edit</a> | <a href="{{ url_for('deleteItem', catalog_name = category.name, item_name = item.title )}}">delete</a>
+
+</div>
