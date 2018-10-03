@@ -1,13 +1,22 @@
-<html>
+{% include "head.html" %}
 <body>
-<h1>Edit Item</h1>
+
+<div class="container" style="background-color:lightblue; padding: 15px;">
 <form action = "{{ url_for('editItem', catalog_name = category.name, item_name = item.title )}}" method='POST'>
     <p>
-        <h3>Edit {{ item.title }}</h3>
+        <h2>Edit {{ item.title }}</h2>
     </p>
-    <input type="input" size="30" name="title" placeholder=" {{category.title}} ">
-    <input type="input" size="100" name="description" placeholder=" {{category.description}} ">
+    <h4>Edit Title<br></h4><input type="input"  name="title" placeholder=" {{item.title}} " ><br>
+    <h4>Edit Description</h4><input type="input"  name="description" placeholder=" {{item.description}}" style="width: 300px; height:300px; "><br>
+    <h4>Select Category</h4>
+    <select name=categories>
+        {% for c in r %}
+            <option value= "{{c.name}}">{{c.name}}</option>"
+        {% endfor %}
+    </select>
+
+    <br>
     <input type="submit" value="Edit"><a href=" {{ url_for('showAllCategories')}}"> Cancel </a>
 </form>
+</div>
 </body>
-</html>

@@ -173,23 +173,27 @@ def aboutItem(catalog_name,item_name):
 #edit catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/edit', methods=['GET','POST'])
 def editItem(catalog_name,item_name):
-    if 'username' not in login_session:
-        return redirect('/login')
+    #if 'username' not in login_session:
+    #    return redirect('/login')
+    #else:
+    results = session.query(Categories).all()
+    get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
+    editItem = session.query(Items).filter_by(title=item_name,category_id= get_category_id.id).one()
+    if request.method == 'POST':
+        if request.form['title']:
+            editItem.title = request.form['title']
+        if request.form['description']:
+            editItem.description = request.form['description']
+        if request.form.get('categories'):
+            find_category = session.query(Categories).filter_by(name=request.form.get('categories')).one()
+            editItem.category = find_category
+        session.add(editItem)
+        session.commit()
+        output = redirect(url_for('showAllCategories'))
+        return output
     else:
-        get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
-        editItem = session.query(Items).filter_by(title=item_name,category_id= get_category_id.id).one()
-        if request.method == 'POST':
-            if request.form['title']:
-                editItem.title = request.form['title']
-            if request.form['description']:
-                editItem.description = request.form['description']
-            session.add(editItem)
-            session.commit()
-            output = redirect(url_for('showAllCategories'))
-            return output
-        else:
-            output = render_template('itemedit.html',category = get_category_id, item= editItem)
-            return output
+        output = render_template('itemedit.html',category = get_category_id, item= editItem, r=results)
+        return output
 
 #delete catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/delete', methods=['GET','POST'])
