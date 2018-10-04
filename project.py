@@ -8,6 +8,7 @@ from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 from flask import make_response
+from flask_wtf.csrf import CSRFProtect
 
 
 CLIENT_SECRETS_FILE = json.loads(open('client_secret.json', 'r').read())['web']['client_id']
@@ -15,7 +16,7 @@ CLIENT_SECRETS_FILE = json.loads(open('client_secret.json', 'r').read())['web'][
 APPLICATION_NAME = "Catalog Web App"
 
 app = Flask(__name__)
-
+csrf = CSRFProtect(app)
 app.secret_key = 'omzY7yqx45yBmQDmlGH5_brw'
 
 sql_lite_db = create_engine('sqlite:///catalogdb.db')
@@ -198,18 +199,49 @@ def editItem(catalog_name,item_name):
 #delete catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/delete', methods=['GET','POST'])
 def deleteItem(catalog_name,item_name):
-    if 'username' not in login_session:
-        return redirect('/login')
+    #if 'username' not in login_session:
+    #    return redirect('/login')
+    results = session.query(Categories).all()
+    get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
+    deleteitem = session.query(Items).filter_by(title=item_name,category_id= get_category_id.id).one()
+    if request.method == 'POST':
+        session.delete(deleteitem)
+        session.commit()
+        output = redirect(url_for('showAllCategories'))
+        return output
     else:
-        pass
+        output = render_template('itemdelete.html',category = get_category_id, item= deleteitem, r=results)
+        return output
 
 #create a new catalog item
 @app.route('/catalog/<string:catalog_name>/item/new', methods=['GET','POST'])
 def newItem(catalog_name):
-    if 'username' not in login_session:
-        return redirect('/login')
-    return "you reached new item creation"
+    #if 'username' not in login_session:
+    #    return redirect('/login')
+    #else:
+    results = session.query(Categories).all()
+    get_category_id = session.query(Categories).filter_by(name=catalog_name).one()
 
+    if request.method == 'POST':
+        find_category = session.query(Categories).filter_by(name=request.form.get('categories')).one()
+        createItem = Items(title= request.form['title'], description =request.form['description'],category = find_category)
+        session.add(createItem)
+        session.commit()
+        output = redirect(url_for('showAllCategories'))
+        return output
+    else:
+        output = render_template('newitem.html',category = get_category_id, r=results)
+        return output
+# ---JSON---- #
+@app.route('/catalog/<string:catalog_name>/items/JSON')
+def jsonItemListForCatelog():
+    pass
+@app.route('/catalog/all/JSON')
+def jsonAll():
+    return "json all"
+@app.route('/catalog/<string:catalog_name>/<string:item_name>/JSON')
+def jsonItem():
+    pass
 #---USER INFO HELPERS---#
 
 # User Helper Functions

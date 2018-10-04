@@ -1,0 +1,14 @@
+{% include "head.html" %}
+<body>
+
+<div class="container" style="background-color:lightblue; padding: 15px;">
+    <form action = "{{ url_for('deleteItem', catalog_name = category.name, item_name = item.title )}}" method='POST'>
+        <p>
+        <h2>Delete {{ item.title }}</h2>
+        </p>
+
+        <br>
+        <input type="submit" value="Delete"><a href=" {{ url_for('showAllCategories')}}"> Cancel </a>
+    </form>
+</div>
+</body>
