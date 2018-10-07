@@ -18,3 +18,8 @@ The requests HTTP library.
 * sqlalchemy
 * flask
 
+## run instructions
+
+* python database_setup.py
+* python lotsofcatagories.py
+* python3 project.py
