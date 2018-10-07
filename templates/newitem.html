@@ -9,7 +9,7 @@
         <h4>Title<br></h4><input type="input"  name="title" placeholder=" "  required><br>
         <h4>Description</h4><input type="input"  name="description" placeholder=" " required style="width: 300px; height:300px; "><br>
         <h4>Select Category</h4>
-        <input type="hidden" name="_csrf" value="<your_csrf_token>">
+        <!--<input type="hidden" name="_csrf" value="<your_csrf_token>"> -->
         <select name=categories>
             {% for c in r %} <!-- r= result of all categories-->
             <option value= "{{c.name}}">{{c.name}}</option>"

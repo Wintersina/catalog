@@ -52,9 +52,9 @@ class Recent(Base):
     __tablename__ = "recently"
 
     id = Column(Integer, primary_key=True)
-    item = Column(String(80), nullable=False)
-    category = Column(String(80), nullable=False)
     created_date = Column(DateTime, default=datetime.datetime.utcnow)
+    item = relationship(Items)
+    item_id = Column(Integer,ForeignKey('items.id'))
 
 engine = create_engine('sqlite:///catalogdb.db')
 

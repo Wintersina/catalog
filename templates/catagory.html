@@ -6,12 +6,17 @@
                 <div class="col-sm-6">
                     <h2>Categories</h2>
                     {%for i in a_c %}
-                    <a href="{{ url_for('catalogItems', catalog_name = i.name) }}" class="text-info">{{i.name}}</a>
-                    <br>
+                        <a href="{{ url_for('catalogItems', catalog_name = i.name) }}" class="text-info">{{i.name}}</a>
+                        <br>
                     {%endfor%}
                 </div>
                 <div class="col-sm-6" >
+                    <!-- <a href="{{url_for('newItem',catalog_name='new')}}" class="text-info">Add a new item</a> -->
                     <h2>Latest Items</h2>
+                    {%for i in a_r%}
+                        <a href="{{ url_for('aboutItem', catalog_name = i.item.category.name, item_name=i.item.title )}}">{{i.item.title}} - {{i.item.category.name}}</a>
+                        <br>
+                    {%endfor%}
                 </div>
             </div>
 </div>
