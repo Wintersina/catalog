@@ -43,7 +43,8 @@ class Items(Base):
             'id' :self.id,
             'title': self.title,
             'description': self.description,
-            'category_id':self.category_id
+            'category_id':self.category_id,
+            'category': self.category.serialize
         }
 
 

@@ -20,7 +20,12 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 users = Users(name="Sina Serati", email="wintersina@gmail.com")
+session.add(users)
+session.commit()
 
+users2 = Users(name="fake name", email="fakeemaila@gmail.com")
+session.add(users)
+session.commit()
 
 cat1 = Categories(name="Soccer")
 
@@ -51,7 +56,7 @@ session.add(recent1)
 session.commit()
 
 item3 = Items(title="Yellow Card", description="Every good soccer play should earn one, at least once a game.",
-              user=users, category=cat1)
+              user=users2, category=cat1)
 
 session.add(item3)
 session.commit()

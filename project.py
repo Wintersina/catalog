@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, redirect, request, flash, jso
 import os, random, string, json, requests, httplib2
 from datetime import datetime
 from sqlalchemy import create_engine, desc
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, joinedload
 from database_setup import Users,Categories,Items,Base, Recent
 
 from flask import session as login_session
@@ -103,12 +103,6 @@ def showLogin():
 
 
 
-
-
-
-
-
-
 #list all catalogs
 @app.route('/')
 @app.route('/catalog/')
@@ -137,13 +131,15 @@ def aboutItem(catalog_name,item_name):
 #edit catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/edit', methods=['GET','POST'])
 def editItem(catalog_name,item_name):
+    results = db_session.query(Categories).all()
+    get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
+    editItem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
     if 'username' not in login_session:
         print(login_session)
         return "Please log in :)"
+    elif login_session['username'] != editItem.user.name :
+        return "you dont have Authorization to edit this record!!"
     else:
-        results = db_session.query(Categories).all()
-        get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
-        editItem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
         if request.method == 'POST':
             if request.form['title']:
                 editItem.title = request.form['title']
@@ -163,13 +159,15 @@ def editItem(catalog_name,item_name):
 #delete catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/delete', methods=['GET','POST'])
 def deleteItem(catalog_name,item_name):
+    results = db_session.query(Categories).all()
+    get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
+    deleteitem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
     if 'username' not in login_session:
         print(login_session)
         return "Please log in :)"
+    elif login_session['username'] != deleteitem.user.name :
+        return "you dont have Authorization to delete this record!!"
     else:
-        results = db_session.query(Categories).all()
-        get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
-        deleteitem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
         deleteRecent = db_session.query(Recent).filter_by(item_id=deleteitem.id).first()
         if request.method == 'POST':
             db_session.delete(deleteitem)
@@ -219,8 +217,10 @@ def jsonItemListForCatelog(catalog_name):
 @app.route('/catalog/all/JSON')
 def jsonAll():
     get_category = db_session.query(Categories).all()
+    #db_session.query(Categories).options(joinedload(Categories.items)).all()
     get_all_items = db_session.query(Items).all()
     #n = get_category + get_all_items
+    #jsonify(Catalog=[dict(c.serializable, items=[i.serializable for i in c.items])for c in categories]))
     return jsonify(Categories=[i.serialize for i in get_category],Items=[i.serialize for i in get_all_items])
 #shows 1 item in a given catalog
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/JSON')
