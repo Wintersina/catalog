@@ -27,7 +27,7 @@ cat1 = Categories(name="Soccer")
 session.add(cat1)
 session.commit()
 
-item1 = Items(title="Shoes", description="Sharp Bottems. Nail like.",
+item1 = Items(title="Shoes", description="Football boots, called cleats or soccer shoes in North America, are an item of footwear worn when playing football. Those designed for grass pitches have studs on the outsole to aid grip.",
               user=users, category=cat1)
 
 session.add(item1)
@@ -38,7 +38,7 @@ recent1 = Recent(created_date=datetime.now(),item=item1)
 session.add(recent1)
 session.commit()
 
-item2 = Items(title="Gloves", description="To catch the ball with. Mainly used by 'Golies'",
+item2 = Items(title="Gloves", description="While only one player on the field is wearing them, goalkeeper gloves are an essential part of every soccer team's defense. Goalkeeper gloves provide a better grip on the ball, protect and cushion your fingers and palms, and help you block, catch and punch the ball.",
               user=users, category=cat1)
 
 session.add(item2)
@@ -68,7 +68,7 @@ cat2 = Categories(name="Basketball")
 session.add(cat2)
 session.commit()
 
-item1 = Items(title="Shoes", description="flat with some air in it, to help you bounce.",
+item1 = Items(title="Shoes", description="The insert is a feature that appears on some basketball shoe models. It is a detachable insole designed to provide arch support.",
               user=users, category=cat2)
 
 session.add(item1)
