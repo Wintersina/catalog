@@ -110,6 +110,7 @@ def showLogin():
 
 
 #list all catalogs
+@app.route('/')
 @app.route('/catalog/')
 def showAllCategories():
     recently = db_session.query(Recent).order_by(desc(Recent.created_date)).all()
