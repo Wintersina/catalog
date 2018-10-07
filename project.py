@@ -288,11 +288,9 @@ def jsonItem(catalog_name, item_name):
     get_category_id = db_session.query(Categories).filter_by(
         name=catalog_name
     ).one()
-    item = db_session.query(Items)
-    .filter_by(
+    item = db_session.query(Items).filter_by(
         title=item_name,
-        category_id=get_category_id.id)
-    .one()
+        category_id=get_category_id.id).one()
     return jsonify(item.serialize)
 # END JSON
 
