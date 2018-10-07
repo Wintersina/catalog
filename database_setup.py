@@ -1,3 +1,7 @@
+# Sina Serati
+# Oct/7th/2018
+# about: database_setup.py is the models for all items being stored in the db.
+
 import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -6,6 +10,7 @@ from sqlalchemy import create_engine
 
 Base = declarative_base()
 
+# Keeps track of users creating items
 class Users(Base):
     __tablename__ = 'users'
 
@@ -13,6 +18,7 @@ class Users(Base):
     name = Column(String(80), nullable=False)
     email = Column(String(80), nullable=False)
 
+# keeps track of all categories in DB
 class Categories(Base):
     __tablename__ = 'categories'
 
@@ -25,7 +31,7 @@ class Categories(Base):
             'id' : self.id,
             'name' : self.name
         }
-
+# model for items, in relation to each catagory and users
 class Items(Base):
     __tablename__ = 'items'
 
@@ -48,7 +54,7 @@ class Items(Base):
         }
 
 
-
+# model for keeping track of times items were created, in relation to items
 class Recent(Base):
     __tablename__ = "recently"
 
