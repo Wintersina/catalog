@@ -96,12 +96,7 @@ def showLogin():
     return render_template('login.html',STATE=state)
 
 
-
 ## -- ## LOGIN
-
-
-
-
 
 
 
@@ -167,45 +162,48 @@ def editItem(catalog_name,item_name):
 #delete catalog item
 @app.route('/catalog/<string:catalog_name>/<string:item_name>/delete', methods=['GET','POST'])
 def deleteItem(catalog_name,item_name):
-    #if 'username' not in login_session:
-    #    return redirect('/login')
-    results = db_session.query(Categories).all()
-    get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
-    deleteitem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
-    deleteRecent = db_session.query(Recent).filter_by(item_id=deleteitem.id).first()
-    if request.method == 'POST':
-        db_session.delete(deleteitem)
-        db_session.commit()
-        db_session.delete(deleteRecent)
-        db_session.commit()
-        output = redirect(url_for('showAllCategories'))
-        return output
+    if 'username' not in login_session:
+        print(login_session)
+        return "Please log in :)"
     else:
-        output = render_template('itemdelete.html',category = get_category_id, item= deleteitem, r=results)
-        return output
+        results = db_session.query(Categories).all()
+        get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
+        deleteitem = db_session.query(Items).filter_by(title=item_name, category_id= get_category_id.id).first()
+        deleteRecent = db_session.query(Recent).filter_by(item_id=deleteitem.id).first()
+        if request.method == 'POST':
+            db_session.delete(deleteitem)
+            db_session.commit()
+            db_session.delete(deleteRecent)
+            db_session.commit()
+            output = redirect(url_for('showAllCategories'))
+            return output
+        else:
+            output = render_template('itemdelete.html',category = get_category_id, item= deleteitem, r=results)
+            return output
 
 #create a new catalog item
 @app.route('/catalog/<string:catalog_name>/item/new', methods=['GET','POST'])
 def newItem(catalog_name):
-    #if 'username' not in login_session:
-    #    return redirect('/login')
-    #else:
-    results = db_session.query(Categories).all()
-    get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
-
-    if request.method == 'POST':
-        find_category = db_session.query(Categories).filter_by(name=request.form.get('categories')).one()
-        createItem = Items(title= request.form['title'], description =request.form['description'],category = find_category)
-        db_session.add(createItem)
-        db_session.commit()
-        output = redirect(url_for('showAllCategories'))
-        recent = Recent(item=createItem,created_date=datetime.now())
-        db_session.add(recent)
-        db_session.commit()
-        return output
+    if 'username' not in login_session:
+        print(login_session)
+        return "Please log in :)"
     else:
-        output = render_template('newitem.html',category = get_category_id, r=results)
-        return output
+        results = db_session.query(Categories).all()
+        get_category_id = db_session.query(Categories).filter_by(name=catalog_name).one()
+
+        if request.method == 'POST':
+            find_category = db_session.query(Categories).filter_by(name=request.form.get('categories')).one()
+            createItem = Items(title= request.form['title'], description =request.form['description'],category = find_category)
+            db_session.add(createItem)
+            db_session.commit()
+            output = redirect(url_for('showAllCategories'))
+            recent = Recent(item=createItem,created_date=datetime.now())
+            db_session.add(recent)
+            db_session.commit()
+            return output
+        else:
+            output = render_template('newitem.html',category = get_category_id, r=results)
+            return output
 
 
 ## ---JSON---- ##
