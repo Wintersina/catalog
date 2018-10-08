@@ -1,3 +1,8 @@
-.container {
-    background-color:lightblue;
+.container{
+
+        background-color: red;
+        padding: 15px;
+}
+.body{
+        bgcolor: red;
 }
